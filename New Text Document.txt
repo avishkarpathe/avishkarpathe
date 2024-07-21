@@ -1,0 +1,148 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+const int BOARD_SIZE = 3;      // Size of the board (3x3)
+const char PLAYER1_MARK = 'X'; // Mark for player 1
+const char PLAYER2_MARK = 'O'; // Mark for player 2
+
+// Struct to hold player profiles
+struct PlayerProfile {
+    string name;
+    int wins;
+    int losses;
+    int longestStreak;
+    int currentStreak;
+};
+
+// Struct to hold game state information
+struct GameState {
+    char board[BOARD_SIZE * BOARD_SIZE];
+    bool gameOver;
+    char currentPlayerMark;
+    int turn;
+};
+
+// Initialize the game state
+void initGameState(GameState& state) {
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        state.board[i] = ' '; // Empty board cells
+    }
+    state.gameOver = false;
+    state.currentPlayerMark = PLAYER1_MARK;
+    state.turn = 0;
+}
+
+// Display the current state of the board
+void displayBoard(const GameState& state) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            cout << state.board[i * BOARD_SIZE + j];
+            if (j < BOARD_SIZE - 1) cout << " | "; // Column separators
+        }
+        cout << endl;
+        if (i < BOARD_SIZE - 1) cout << "---------" << endl; // Row separators
+    }
+}
+
+// Check if the current player has won
+bool checkWin(const GameState& state) {
+    // Check rows
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        if (state.board[i * BOARD_SIZE] == state.board[i * BOARD_SIZE + 1] && 
+            state.board[i * BOARD_SIZE] == state.board[i * BOARD_SIZE + 2] && 
+            state.board[i * BOARD_SIZE] != ' ') {
+            return true;
+        }
+    }
+    // Check columns
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        if (state.board[i] == state.board[i + BOARD_SIZE] && 
+            state.board[i] == state.board[i + 2 * BOARD_SIZE] && 
+            state.board[i] != ' ') {
+            return true;
+        }
+    }
+    // Check diagonals
+    if ((state.board[0] == state.board[BOARD_SIZE + 1] && 
+         state.board[0] == state.board[2 * BOARD_SIZE + 2] && 
+         state.board[0] != ' ') ||
+        (state.board[BOARD_SIZE - 1] == state.board[BOARD_SIZE * 2 - 2] && 
+         state.board[BOARD_SIZE - 1] == state.board[BOARD_SIZE * 2 + 1] && 
+         state.board[BOARD_SIZE - 1] != ' ')) {
+        return true;
+    }
+    return false;
+}
+
+// Main game logic
+void playGame(PlayerProfile& player1, PlayerProfile& player2) {
+    GameState state;
+    initGameState(state);
+
+    while (!state.gameOver) {
+        displayBoard(state);
+        cout << "Enter move (1-" << BOARD_SIZE * BOARD_SIZE << "): ";
+        int move;
+        cin >> move;
+        move--; // Convert to 0-based index
+        if (move < 0 || move >= BOARD_SIZE * BOARD_SIZE || state.board[move] != ' ') {
+            cout << "Invalid move, try again." << endl;
+            continue;
+        }
+
+        state.board[move] = state.currentPlayerMark;
+        state.turn++;
+        if (checkWin(state)) {
+            displayBoard(state);
+            cout << "Player " << (state.currentPlayerMark == PLAYER1_MARK ? player1.name : player2.name) << " wins!" << endl;
+            if (state.currentPlayerMark == PLAYER1_MARK) {
+                player1.wins++;
+                player2.losses++;
+                player1.currentStreak++;
+                player2.currentStreak = 0;
+                if (player1.currentStreak > player1.longestStreak) {
+                    player1.longestStreak = player1.currentStreak;
+                }
+            } else {
+                player2.wins++;
+                player1.losses++;
+                player2.currentStreak++;
+                player1.currentStreak = 0;
+                if (player2.currentStreak > player2.longestStreak) {
+                    player2.longestStreak = player2.currentStreak;
+                }
+            }
+            state.gameOver = true;
+        } else if (state.turn == BOARD_SIZE * BOARD_SIZE) {
+            displayBoard(state);
+            cout << "It's a draw!" << endl;
+            state.gameOver = true;
+        }
+        state.currentPlayerMark = (state.currentPlayerMark == PLAYER1_MARK) ? PLAYER2_MARK : PLAYER1_MARK;
+    }
+}
+
+// Display the scorecard
+void displayScorecard(const PlayerProfile& player1, const PlayerProfile& player2) {
+    cout << "Scorecard:" << endl;
+    cout << player1.name << ": " << player1.wins << " wins, " << player1.losses << " losses, Longest Streak: " << player1.longestStreak << endl;
+    cout << player2.name << ": " << player2.wins << " wins, " << player2.losses << " losses, Longest Streak: " << player2.longestStreak << endl;
+}
+
+int main() {
+    PlayerProfile player1 = {"Player 1", 0, 0, 0, 0};
+    PlayerProfile player2 = {"Player 2", 0, 0, 0, 0};
+
+    int playAgain;
+    do {
+        playGame(player1, player2);
+        displayScorecard(player1, player2);
+        cout << "Press 0 to play again, or -1 to exit: ";
+        cin >> playAgain;
+    } while (playAgain != -1);
+
+    return 0;
+}
