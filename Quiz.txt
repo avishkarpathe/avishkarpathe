@@ -1,57 +1,60 @@
 #include <iostream>
 #include <string>
+#include <cctype> // for toupper function
 
-using namespace std;
-
+// Define a constant for the number of questions
 const int NUM_QUESTIONS = 4;
 
-// Struct for a quiz question
-struct Question {
-    string text;
-    string options[4];
-    char correctAnswer;
+// Define a struct to represent a quiz question
+struct QuizQuestion {
+    std::string prompt;
+    std::string choices[4];
+    char correctChoice;
 };
 
-// Array of quiz questions
-Question questions[NUM_QUESTIONS] = {
-    {"What is the capital of France?",
-        {"A. Berlin", "B. Madrid", "C. Paris", "D. Rome"}, 'C'},
-    {"Which planet is known as the Red Planet?",
-        {"A. Earth", "B. Mars", "C. Jupiter", "D. Saturn"}, 'B'},
-    {"What is the largest ocean on Earth?",
-        {"A. Atlantic Ocean", "B. Indian Ocean", "C. Arctic Ocean", "D. Pacific Ocean"}, 'D'}
-};
-
-// Function to display a question and get the user's answer
-char askQuestion(const Question& q) {
-    cout << q.text << endl;
+// Function to display a quiz question and get the user's answer
+char displayQuestion(const QuizQuestion& question) {
+    std::cout << question.prompt << std::endl;
     for (int i = 0; i < 4; ++i) {
-        cout << q.options[i] << endl;
+        std::cout << question.choices[i] << std::endl;
     }
-    cout << "Enter your answer (A/B/C/D): ";
+    std::cout << "Enter your answer (A/B/C/D): ";
     char answer;
-    cin >> answer;
-    return toupper(answer);
+    std::cin >> answer;
+    return std::toupper(answer);
 }
 
 // Function to play the quiz game
-void playQuiz() {
+void playQuiz(QuizQuestion questions[], int numQuestions) {
     int score = 0;
-    for (int i = 0; i < NUM_QUESTIONS; ++i) {
-        cout << "\nQuestion " << (i + 1) << ":" << endl;
-        char userAnswer = askQuestion(questions[i]);
-        if (userAnswer == questions[i].correctAnswer) {
-            cout << "Correct!" << endl;
+    for (int i = 0; i < numQuestions; ++i) {
+        std::cout << "\nQuestion " << (i + 1) << ":" << std::endl;
+        char userAnswer = displayQuestion(questions[i]);
+        if (userAnswer == questions[i].correctChoice) {
+            std::cout << "Correct!" << std::endl;
             score++;
         } else {
-            cout << "Incorrect. The correct answer was " << questions[i].correctAnswer << "." << endl;
+            std::cout << "Incorrect. The correct answer was " << questions[i].correctChoice << "." << std::endl;
         }
     }
-    cout << "\nYour total score is: " << score << "/" << NUM_QUESTIONS << endl;
+    std::cout << "\nYour total score is: " << score << "/" << numQuestions << std::endl;
 }
 
 int main() {
-    cout << "Welcome to the Quiz Game!" << endl;
-    playQuiz();
+    // Create an array of quiz questions
+    QuizQuestion questions[NUM_QUESTIONS] = {
+        {"What is the capital of France?",
+            {"A. Berlin", "B. Madrid", "C. Paris", "D. Rome"}, 'C'},
+        {"Which planet is known as the Red Planet?",
+            {"A. Earth", "B. Mars", "C. Jupiter", "D. Saturn"}, 'B'},
+        {"What is the largest ocean on Earth?",
+            {"A. Atlantic Ocean", "B. Indian Ocean", "C. Arctic Ocean", "D. Pacific Ocean"}, 'D'},
+        {"What is the smallest country in the world?",
+            {"A. Vatican City", "B. Monaco", "C. Nauru", "D. Tuvalu"}, 'A'}
+    };
+
+    // Play the quiz game
+    std::cout << "Welcome to the Quiz Game!" << std::endl;
+    playQuiz(questions, NUM_QUESTIONS);
     return 0;
 }
